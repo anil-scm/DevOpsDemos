@@ -1,0 +1,15 @@
+clear
+rpm -q python
+yum install epel-release -y
+yum install ansible
+ansible --version
+yum -y update
+yum -y install python-pip
+curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+python get-pip.py
+pip install boto3
+pip install awscli
+pip install awscli --upgrade
+pip install boto
+yum install python
+ansible --version

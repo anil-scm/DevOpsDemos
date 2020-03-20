@@ -1,0 +1,94 @@
+###tomcat server setup###
+1.
+*Instance creation
+*Instance AMI: redhat linux 7.3(aws)
+*Instance type: t2.small
+
+2.
+yum install java -y     #install java 
+
+3.
+java -version      #verify java
+
+4.
+yum install wget -y     #install wget to download tomcat package/s
+
+5.
+#goto opt dir. ,create tomcat folder,goto tomcat folder
+cd /opt/
+mkdir tomcat
+
+6.
+# goto tomcat site ,copy link of one version from core download like 8.5.51/tar.gz
+wget http://mirrors.estointernet.in/apache/tomcat/tomcat-8/v8.5.51/bin/apache-tomcat-8.5.51.tar.gz
+
+7.
+tar -xvf apache-tomcat-8.5.51.tar.gz    #untar the download content
+
+8.
+cd apache-tomcat-8.5.51
+cd bin
+chmod 777 starup.sh        #change permission to startup.sh and shutdown.sh
+chmod 777 shutdown.sh
+
+pwd   #copy path /opt/tomcat/apache/tomcat/tomcat-8.5.51/bin
+echo $PATH   #copy path like /usr/bin
+
+#create soft link for startup.sh & shutdown.sh
+ln -s /opt/tomcat/apache/tomcat/tomcat-8.5.51/bin/startup.sh /usr/bin/on
+ln -s /opt/tomcat/apache/tomcat/tomcat-8.5.51/bin/shutdown.sh /usr/bin/off
+
+on   #now to start tomcat
+off  #to shutdown tomcat
+
+ps -ef | grep tomcat #to check tomcat status
+
+9.
+*in aws s.g,add 8080 port in inbound
+#open browser enter public ip:8080 (default 8080port for tomcat)
+now you are able to see the tomcat site
+
+10.
+#to change port 8080 --> 8090
+cd /opt/tomcat/apache/tomcat/tomcat-8.5.51/conf
+vi server.xml
+#change 8080 port at conector 8080 to 8090 and save
+*in aws s.g,add 8090 port in inbound
+
+# Restart tomcat 
+off
+on
+
+# Browse tomcat ip:8090
+
+11.
+#find and update context.xml
+find / -name context.xml
+
+cli o/p:
+/opt/tomcat/apache-tomcat-8.5.51/conf/context.xml
+/opt/tomcat/apache-tomcat-8.5.51/webapps/host-manager/META-INF/context.xml   #update 
+/opt/tomcat/apache-tomcat-8.5.51/webapps/manager/META-INF/context.xml    #update
+
+vi /opt/tomcat/apache-tomcat-8.5.51/webapps/host-manager/META-INF/context.xml
+
+<!--  <Valve className="org.apache.catalina.valves.RemoteAddrValve"
+         allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" /> -->   #uncomment start with <!-- end with --> and do like this the other and save
+
+12.
+#add users and role in /opt/tomcat/apache-tomcat-8.5.51/conf/tomcat-users.xml
+
+<role rolename="manager-gui"/>
+<role rolename="manager-script"/>
+<role rolename="manager-jmx"/>
+<role rolename="manager-status"/>
+<user username="tomcat" password="s3cret" roles="manager-gui"/>
+<user username="admin" password="admin" roles="manager-gui, manager-script, manager-jmx, manager-status"/>
+<user username="anil" password="anil" roles="manager-script"/>	
+
+Now login using above user and password
+
+
+****************end*********************	 
+		 
+

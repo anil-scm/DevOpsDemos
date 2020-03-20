@@ -1,0 +1,22 @@
+#update
+sudo yum install update
+
+#install unzip
+sudo yum install wget unzip
+
+#download terraform
+wget https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip
+
+#unzip terraform
+sudo unzip ./terraform_0.11.13_linux_amd64.zip -d /usr/local/bin/
+
+#environment variable setup 
+vi ~/.bashrc
+export PATH=$PATH:/usr/local/bin        #at the end of file
+source ~/.bashrc
+
+#check terraform version
+terraform -v
+
+
+****ref-https://linoxide.com/linux-how-to/how-to-install-terraform-on-centos-ubuntu/****
