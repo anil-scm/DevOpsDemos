@@ -1,0 +1,29 @@
+CMD 
+	OUTPUT 
+		COMMENT 
+		
+		#EC2 instance with IAM role attach(ec2-fullaccess, s3-fullaccess, route53-fullaccess, IAM-fullaccess, VPC-fullaccess)	
+        		
+	
+		#curl kops, change permission & move kops to /usr/local/bin/
+curl -Lo kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+chmod +x ./kops
+sudo mv ./kops /usr/local/bin/
+
+		#curl kubectl, change permission & move kubectl to /usr/local/bin/
+curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+
+		#install awscli
+curl "https://bootstrap.pypa.io/2.6/get-pip.py" -o "get-pip.py"
+python get-pip.py
+pip install awscli	
+
+		#Create dns hosted zone under ROUTE53 
+		#stanley.com #dns private 
+
+		#seting ENV variable
+vi ~/.bashrc
+  export PATH=$PATH:/usr/local/bin
+source ~/.bashrc

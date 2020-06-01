@@ -1,0 +1,102 @@
+#git installation
+	sudo su
+	yum install git -y
+	git --version
+	
+#install jdk(JAVA)    
+	cd /opt/
+	wget https://download.java.net/java/GA/jdk13.0.1/cec27d702aa74d5a8630c65ae61e4305/9/GPL/openjdk-13.0.1_linux-x64_bin.tar.gz
+	tar -xvf openjdk-13.0.1_linux-x64_bin.tar.gz
+		
+# set environment variable
+    vi .profile
+i
+JAVA_HOME='/opt/jdk-13.0.1'
+PATH="$JAVA_HOME/bin:$PATH"
+export PATH
+:wq!
+    source .profile
+		
+#verify java version
+	java -version
+
+OR 
+
+#install java jdk develop
+	yum install -y java-1.8.0-openjdk-devel	
+
+#env. variable setup
+	JAVA_HOME='/usr/lib/jvm/jre-openjdk'
+	PATH="$JAVA_HOME/bin:$PATH"
+	export PATH
+	
+#verify java
+		java -version
+		
+		
+## o/p should be as below
+$ java -version
+openjdk version "13.0.1" 2019-10-15
+OpenJDK Runtime Environment (build 13.0.1+9)
+OpenJDK 64-Bit Server VM (build 13.0.1+9, mixed mode, sharing)
+$
+
+#install maven  
+	cd /opt/
+	wget https://mirrors.estointernet.in/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+	tar -xvf apache-maven-3.6.3-bin.tar.gz
+	
+#set environment 
+	vi .profile
+i
+M2_HOME='/opt/apache-maven-3.6.3'
+PATH="$M2_HOME/bin:$PATH"
+export PATH
+:wq!
+	source .profile
+	
+#verify maven
+	mvn -version
+	
+## o/p should be 
+$ mvn -version
+Apache Maven 3.6.3 (cecedd343002696d0abb50b32b541b8a6ba2883f)
+Maven home: /opt/apache-maven-3.6.3
+Java version: 13.0.1, vendor: Oracle Corporation, runtime: /opt/jdk-13.0.1
+Default locale: en, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-47-generic", arch: "amd64", family: "unix"
+$               
+
+#ref: https://www.journaldev.com/33588/install-maven-linux-ubuntu
+
+#jenkins install
+	wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+	rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+	yum install jenkins-2.204* -y
+    service jenkins start
+	service jenkins enable
+	service jenkins status
+	
+#change jenkins port
+sudo vim /etc/sysconfig/jenkins
+
+JENKINS_PORT=”8080"   #change port to customize port 8090 
+
+service jenkins restart #browse on 8090 port
+
+#docker install
+	yum remove docker-io 		#Remove all docker data (and never get it back!)
+	rm -rf /var/lib/docker   	#Remove the Docker repo config
+	rm /etc/yum.repos.d/docker.repo	
+	yum install docker-io
+	yum install the docker-engine-1.7.1 rpm
+	docker -v
+	service docker status
+	service docker start
+	service docker enable
+	
+	
+	
+#Ref: https://linuxize.com/ #search for all these installation(s)
+
+ 

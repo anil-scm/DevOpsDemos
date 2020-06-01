@@ -1,0 +1,102 @@
+		#DOCKER RUN
+docker run -itd --name=alpine1 alpine		
+	cad155eb1b4eec8f2c32785fd2e2f5903a027e9fc309a89b286715a6cb9af454
+
+		#docker images check
+docker images
+	REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+	alpine              latest              f70734b6a266        3 weeks ago         5.61MB
+
+		#check container
+docker ps
+	CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+	cad155eb1b4e        alpine              "/bin/sh"           54 seconds ago      Up 53 seconds                           alpine1
+
+		#docker execute
+docker exec -it alpine1 /bin/sh		
+	
+		#DOCKER NETWORK
+docker network ls
+	NETWORK ID          NAME                DRIVER              SCOPE
+	6085b13a24e4        bridge              bridge              local
+	cde1d7bb28f1        host                host                local
+	e91ce1b16389        none                null                local		
+		
+		#docker create network
+docker network create --driver=bridge bg1 
+	45b97bda2ed83b9368236fa7f4eea544d096193681341c9e30318197df597556
+        #check network again	
+docker network ls
+	NETWORK ID          NAME                DRIVER              SCOPE
+	45b97bda2ed8        bg1                 bridge              local
+	6085b13a24e4        bridge              bridge              local
+	cde1d7bb28f1        host                host                local
+	e91ce1b16389        none                null                local
+		#run a container on new network
+docker run -itd --name=alpine2 --network=bg1 alpine		
+	be6f69caa218ecd6b96276c5cd98dd2b2f7e70a1a6810a9bd9eefd9155ba980d
+		#inspect network
+docker network inspect bg1
+	[
+    {
+        "Name": "bg1",
+        "Id": "45b97bda2ed83b9368236fa7f4eea544d096193681341c9e30318197df597556",
+        "Created": "2020-05-21T07:38:18.16370794Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "172.19.0.0/16",
+                    "Gateway": "172.19.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "be6f69caa218ecd6b96276c5cd98dd2b2f7e70a1a6810a9bd9eefd9155ba980d": {
+                "Name": "alpine2",
+                "EndpointID": "50025bddbace911845554cd88a27a159baa60525c6505e727c271c1a351e1679",
+                "MacAddress": "02:42:ac:13:00:02",
+                "IPv4Address": "172.19.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {}
+    }
+	]
+
+		#to stop multiple containers and remove multiple containers
+docker stop $(docker ps -q)
+	be6f69caa218
+	cad155eb1b4e
+docker rm $(docker ps -aq)
+	be6f69caa218
+	cad155eb1b4e
+	
+		#docker remove network
+docker network rm bg1	
+	bg1	
+	
+		#DOCKER VOLUME
+docker volume ls
+	DRIVER              VOLUME NAME
+		#docker volume create
+docker volume create vol1
+	vol1
+		#docker remove volume 
+docker volume rm vol1
+    vol1		
+	
+	
+		

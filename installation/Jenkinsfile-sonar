@@ -1,0 +1,16 @@
+node {
+    
+    stage("git checkout") {
+        git credentialsId: 'gitHub', url: 'https://github.com/anil-scm/hello-world.git'
+    }
+    stage ("maven build") {
+        def mavenHome = tool name: "maven1" , type: "maven"				 //maven tool name- maven1//
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    stage ("sonarQube Code Analysis") {
+        def mavenHome = tool name: "maven1" , type: "maven"
+        withSonarQubeEnv("sonar1") {									//sonarQube server name (linked with token)- sonar1//
+            sh "${mavenHome}/bin/mvn sonar:sonar"    
+        }
+    }
+}    

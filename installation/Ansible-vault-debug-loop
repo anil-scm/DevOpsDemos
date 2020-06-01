@@ -1,0 +1,69 @@
+		#ANSIBLE-VAULT
+
+		#how to encrypt a file
+ansible-vault encrypt file-name
+	enter password: *****
+	conform password: *****
+	
+		#how to decrypt a file
+ansible-vault decrypt file-name		
+	enter password: *****
+	
+		#how to encrypt a file with password file
+vi ~/.ssh/matrix
+kbjorlkp+598951747%^%%6grhgf478dhgrisqwke3geu8858vsew3%$*^FD&g6jfR^D% (#a strong password)
+ansible-vault encrypt --vault-password-file ~/.ssh/matrix file-name		
+		
+		#how to decrypt a file with password file
+ansible-vault decrypt --vault-password-file ~/.ssh/matrix file-name		
+
+
+		#ANSIBLE-REGISTER & DEBUG
+---
+- hosts: any
+  become: yes
+
+  tasks:
+  - name: install httpd
+    yum:
+     name: httpd
+     state: present
+	 
+  - name: put content to dest.
+    copy:
+     dest: /var/www/html/index.html
+     content: "hi, ansible debug & registr check\n" 
+    register: index
+	
+  - name: debug to show in o/p of playbook
+    debug:
+     msg: "{{ index }}"
+
+		#By running this playbook, it will give you an o/p  
+
+
+		#ANSIBLE-LOOP & VARS
+---
+- hosts: any		
+  become: yes
+  
+  vars:
+   packages:
+   - name: httpd
+     required: false
+   - name: mysql
+     required: true
+   - name: apache
+     required: true
+
+  tasks:
+  - name: install packages
+    yum:
+     name: "{{ item.name }}"
+     state: present
+    when: item.required == true
+    loop: "{{ packages }}"	
+   
+
+  tasks: 
+  - name: install packages    

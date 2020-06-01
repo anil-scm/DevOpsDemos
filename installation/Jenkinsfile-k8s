@@ -1,0 +1,28 @@
+node {
+    
+    stage("git checkout"){
+        git credentialsId: 'gitHub', url: 'https://github.com/anil-scm/spring-boot-mongo-docker.git'
+    }
+    stage ("mvn build"){
+        def mavenHome = tool name: "maven1" , type: "maven"        //maven tool name- maven1//
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    stage ("docker image build"){
+        sh "docker build -t anildhub/img:v3.0.0 ."
+    }
+    stage ("docker image push"){
+        withCredentials([usernameColonPassword(credentialsId: 'dh-up', variable: 'uname-passwd')]){ //dockerhub credential id- dh-up// 
+           sh "docker login" 
+        }
+           sh "docker push anildhub/img:v3.0.0"
+    }
+    stage ("k8s deploy"){
+        kubernetesDeploy(
+            configs: "springBootMongo.yml",          //k8s manifest file- springBootMongo.yml(deployment, service,ingrees )//
+            kubeconfigId: "kube"					//k8s credential Id- kube//
+        )
+    }  
+/** stage ("Deploy"){
+        sh "kubectl apply -f springBootMongo.yml"
+    } **/
+}  

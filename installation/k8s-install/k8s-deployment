@@ -1,0 +1,100 @@
+CMD 
+	OUTPUT 
+		COMMENT 
+		
+
+		#check nodes-
+kubectl get nodes -o wide
+	NAME                                               STATUS   ROLES    AGE   VERSION   INTERNAL-IP     EXTERNAL-IP      OS-IMAGE                       KERNEL-VERSION   CONTAINER-RUNTIME
+	ip-172-20-51-206.ap-northeast-1.compute.internal   Ready    node     43m   v1.16.9   172.20.51.206   13.231.218.144   Debian GNU/Linux 9 (stretch)   4.9.0-11-amd64   docker://18.9.9
+	ip-172-20-63-173.ap-northeast-1.compute.internal   Ready    node     43m   v1.16.9   172.20.63.173   13.230.116.235   Debian GNU/Linux 9 (stretch)   4.9.0-11-amd64   docker://18.9.9
+	ip-172-20-63-70.ap-northeast-1.compute.internal    Ready    master   45m   v1.16.9   172.20.63.70    18.181.187.128   Debian GNU/Linux 9 (stretch)   4.9.0-11-amd64   docker://18.9.9
+	
+		
+	    #simple Deployment-
+kubectl run anginx --image=nginx --port=80 --replicas=4		
+	kubectl run --generator=deployment/apps.v1 is DEPRECATED and will be removed in a future version. Use kubectl run --generator=run-pod/v1 or kubectl create instead.
+	deployment.apps/anginx created
+	
+
+		#check deployment-
+kubectl get deployment -o wide
+	NAME     READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES   SELECTOR
+	anginx   4/4     4            4           9m44s   anginx       nginx    run=anginx
+	
+		#describe deployment-
+kubectl describe deployment
+	Events:
+	Type    Reason             Age   From                   Message
+	----    ------             ----  ----                   -------
+	Normal  ScalingReplicaSet  17m   deployment-controller  Scaled up replica set anginx-5b9db8d886 to 4
+	
+	
+		#check pod(s)-
+kubectl get pods -o wide
+	NAME                      READY   STATUS    RESTARTS   AGE   IP           NODE                                               NOMINATED NODE   READINESS GATES
+	anginx-5b9db8d886-64rbh   1/1     Running   0          11m   100.96.2.4   ip-172-20-63-173.ap-northeast-1.compute.internal   <none>           <none>
+	anginx-5b9db8d886-g5wtd   1/1     Running   0          11m   100.96.2.3   ip-172-20-63-173.ap-northeast-1.compute.internal   <none>           <none>
+	anginx-5b9db8d886-npnz4   1/1     Running   0          11m   100.96.1.4   ip-172-20-51-206.ap-northeast-1.compute.internal   <none>           <none>
+	anginx-5b9db8d886-xtd62   1/1     Running   0          11m   100.96.1.5   ip-172-20-51-206.ap-northeast-1.compute.internal   <none>           <none>
+	
+		#describe pod(s)-
+kubectl describe pods
+	Events:
+	Type    Reason     Age   From                                                       Message
+	----    ------     ----  ----                                                       -------
+	Normal  Scheduled  13m   default-scheduler                                          Successfully assigned default/anginx-5b9db8d886-xtd62 to ip-172-20-51-206.ap-northeast-1.compute.internal
+	Normal  Pulling    13m   kubelet, ip-172-20-51-206.ap-northeast-1.compute.internal  Pulling image "nginx"
+	Normal  Pulled     13m   kubelet, ip-172-20-51-206.ap-northeast-1.compute.internal  Successfully pulled image "nginx"
+	Normal  Created    13m   kubelet, ip-172-20-51-206.ap-northeast-1.compute.internal  Created container anginx
+	Normal  Started    13m   kubelet, ip-172-20-51-206.ap-northeast-1.compute.internal  Started container anginx
+		
+		#expose deployment-
+kubectl expose deployment anginx --port=80 --type=LoadBalancer		
+	service/anginx exposed
+
+		#check service-
+kubectl get svc -o wide
+    NAME         TYPE           CLUSTER-IP       EXTERNAL-IP                                                                   PORT(S)        AGE     SELECTOR
+	anginx       LoadBalancer   100.71.247.255   ad51c5735669c4990aadc9d4a920a1ff-835713909.ap-northeast-1.elb.amazonaws.com   80:30624/TCP   2m37s   run=anginx
+	kubernetes   ClusterIP      100.64.0.1       <none>                                                                        443/TCP        57m     <none>
+		
+	
+		#describe service-
+kubectl describe svc
+	Name:                     anginx
+	Namespace:                default
+	Labels:                   run=anginx
+	Annotations:              <none>
+	Selector:                 run=anginx
+	Type:                     LoadBalancer
+	IP:                       100.71.247.255
+	LoadBalancer Ingress:     ad51c5735669c4990aadc9d4a920a1ff-835713909.ap-northeast-1.elb.amazonaws.com
+	Port:                     <unset>  80/TCP
+	TargetPort:               80/TCP
+	NodePort:                 <unset>  30624/TCP
+	Endpoints:                100.96.1.4:80,100.96.1.5:80,100.96.2.3:80 + 1 more...
+	Session Affinity:         None
+	External Traffic Policy:  Cluster
+	Events:
+	 Type    Reason                Age    From                Message
+	 ----    ------                ----   ----                -------
+	 Normal  EnsuringLoadBalancer  5m42s  service-controller  Ensuring load balancer
+	 Normal  EnsuredLoadBalancer   5m39s  service-controller  Ensured load balancer
+	 
+		#Access on internet
+		#ad51c5735669c4990aadc9d4a920a1ff-835713909.ap-northeast-1.elb.amazonaws.com 			(#load-balancer)	
+		#18.181.187.128:30624			(#master-ip:nodePort ##add TCP 30624 0.0.0.0/0 in security-group inbound  )
+		
+		#delete deployment-
+kubectl delete deploy anginx
+	deployment.apps "anginx" deleted
+	 
+		#delete service-
+kubectl delete svc anginx
+	service "anginx" deleted
+	
+	
+		
+		
+	

@@ -1,0 +1,29 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deploy
+metadata:
+  name: anil-deploy
+spec:
+  selector:
+    matchLabels:
+      app: stanley-v1.0.0
+  replicas: 7 # tells deployment to run 7 pods matching the template
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+
+  template:
+    metadata:
+      labels:
+        app: stanley-v1.0.0
+    spec:
+      containers:
+      - name: stanley-v1
+        image: anildhub/img:v1.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+
+
+####kubectl apply -f deploy.yml#####

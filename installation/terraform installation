@@ -11,6 +11,7 @@ wget https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_am
 sudo unzip ./terraform_0.11.13_linux_amd64.zip -d /usr/local/bin/
 
 #environment variable setup 
+
 vi ~/.bashrc
 export PATH=$PATH:/usr/local/bin        #at the end of file
 source ~/.bashrc
@@ -19,4 +20,23 @@ source ~/.bashrc
 terraform -v
 
 
-****ref-https://linoxide.com/linux-how-to/how-to-install-terraform-on-centos-ubuntu/****
+****ref: https://linoxide.com/linux-how-to/how-to-install-terraform-on-centos-ubuntu/****
+
+
+#create two files
+ 
+*1.variable.tf
+#to store the secrets of your aws datas like access_key,secrets_keys,region,subnet etc.
+
+*2.main.tf
+#to store the resources in json format.
+
+#Now on terminal run the below commands
+terraform init #to initialize the terraform
+terraform plan #it shows the planing to execute
+terraform apply #it does the real task i.e creates the infrastructure
+terraform destroy #it will kill the infrastructure which was build earlier using the above 2 files
+
+
+*for better understanding/documentation on IaaC of AWS,follow the below link;
+*REF: https://www.terraform.io/docs/providers/aws/index.html

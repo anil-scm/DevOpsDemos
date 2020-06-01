@@ -1,0 +1,184 @@
+CMD 
+	OUTPUT 
+		COMMENT 
+
+		#configure aws with AccessKeyID & secret AccessKey
+aws configure
+		#provide Accesskey ID
+		#provide Secret Accesskey
+
+		#create s3 bucket- 
+aws s3 mb s3://anil.k8s1  (# anil.k8s1-customized name of bucket)
+
+		#export the bucket to store k8s data & state-
+export KOPS_STATE_STORE=s3://anil.k8s1
+
+		#generate key to login to k8s master-
+ssh-keygen
+
+		#kops cmd to create cluster-
+kops create cluster --cloud=aws --zones=ap-northeast-1c --name=anilk8s.stanley.com --dns-zone=stanley.com --dns private
+
+	#Suggestions:
+	* list clusters with: kops get cluster
+	* edit this cluster with: kops edit cluster anilk8s.stanley.com
+	* edit your node instance group: kops edit ig --name=anilk8s.stanley.com nodes
+	* edit your master instance group: kops edit ig --name=anilk8s.stanley.com master-ap-northeast-1c
+	# Finally configure your cluster with: kops update cluster --name anilk8s.stanley.com --yes
+
+
+		#kops cmd to edit the cluster-
+kops edit cluster anilk8s.stanley.com
+
+*****
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  creationTimestamp: "2020-05-15T09:41:46Z"
+  name: anilk8s.stanley.com
+spec:
+  api:
+    dns: {}
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudProvider: aws
+  configBase: s3://anil.k8s1/anilk8s.stanley.com
+  dnsZone: stanley.com
+  etcdClusters:
+  - cpuRequest: 200m
+    etcdMembers:
+    - instanceGroup: master-ap-northeast-1c
+      name: c
+    memoryRequest: 100Mi
+    name: main
+  - cpuRequest: 100m
+    etcdMembers:
+    - instanceGroup: master-ap-northeast-1c
+      name: c
+    memoryRequest: 100Mi
+    name: events
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  kubelet:
+    anonymousAuth: false
+  kubernetesApiAccess:
+  - 0.0.0.0/0
+  kubernetesVersion: 1.16.9
+  masterInternalName: api.internal.anilk8s.stanley.com
+  masterPublicName: api.anilk8s.stanley.com
+  networkCIDR: 172.20.0.0/16
+  networking:
+    kubenet: {}
+  nonMasqueradeCIDR: 100.64.0.0/10
+  sshAccess:
+  - 0.0.0.0/0
+  subnets:
+  - cidr: 172.20.32.0/19
+    name: ap-northeast-1c
+    type: Public
+    zone: ap-northeast-1c
+  topology:
+    dns:
+      type: Private
+    masters: public
+    nodes: public
+*****
+
+		#kops cmd to edit nodes of k8s cluster-
+kops edit ig --name=anilk8s.stanley.com nodes
+
+*****
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2020-05-15T09:41:46Z"
+  generation: 1
+  labels:
+    kops.k8s.io/cluster: anilk8s.stanley.com
+  name: nodes
+spec:
+  image: kope.io/k8s-1.16-debian-stretch-amd64-hvm-ebs-2020-01-17
+  machineType: t2.micro
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes
+  role: Node
+  subnets:
+  - ap-northeast-1c
+*****
+
+		#kops cmd to edit master of k8s cluster-
+kops edit ig --name=anilk8s.stanley.com master-ap-northeast-1c
+
+*****
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: "2020-05-15T09:41:46Z"
+  generation: 1
+  labels:
+    kops.k8s.io/cluster: anilk8s.stanley.com
+  name: master-ap-northeast-1c
+spec:
+  image: kope.io/k8s-1.16-debian-stretch-amd64-hvm-ebs-2020-01-17
+  machineType: t2.micro
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-ap-northeast-1c
+  role: Master
+  subnets:
+  - ap-northeast-1c
+*****
+
+		#now update the cluster-
+kops update cluster --name=anilk8s.stanley.com --yes
+
+	#Suggestions:
+	* validate cluster: kops validate cluster
+	* list nodes: kubectl get nodes --show-labels
+	* ssh to the master: ssh -i ~/.ssh/id_rsa admin@api.anilk8s.stanley.com
+	* the admin user is specific to Debian. If not using Debian please use the appropriate user based on your OS.
+	* read about installing addons at: https://github.com/kubernetes/kops/blob/master/docs/operations/addons.md.
+
+		#kops validate cluster-
+kops validate cluster
+	Using cluster from kubectl context: anilk8s.stanley.com
+
+	Validating cluster anilk8s.stanley.com
+
+	INSTANCE GROUPS
+	NAME                    ROLE    MACHINETYPE     MIN     MAX     SUBNETS
+	master-ap-northeast-1c  Master  t2.micro        1       1       ap-northeast-1c
+	nodes                   Node    t2.micro        2       2       ap-northeast-1c
+
+	NODE STATUS
+	NAME                                                    ROLE    READY
+	ip-172-20-51-206.ap-northeast-1.compute.internal        node    True
+	ip-172-20-63-173.ap-northeast-1.compute.internal        node    True
+	ip-172-20-63-70.ap-northeast-1.compute.internal         master  True
+
+	Your cluster anilk8s.stanley.com is ready
+	
+		#list nodes-
+kubectl get nodes --show-labels
+	NAME                                               STATUS   ROLES    AGE     VERSION   LABELS
+	ip-172-20-51-206.ap-northeast-1.compute.internal   Ready    node     8m16s   v1.16.9   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=t2.micro,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/region=ap-northeast-1,failure-domain.beta.kubernetes.io/zone=ap-northeast-1c,kops.k8s.io/instancegroup=nodes,kubernetes.io/arch=amd64,kubernetes.io/hostname=ip-172-20-51-206.ap-northeast-1.compute.internal,kubernetes.io/os=linux,kubernetes.io/role=node,node-role.kubernetes.io/node=
+	ip-172-20-63-173.ap-northeast-1.compute.internal   Ready    node     8m15s   v1.16.9   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=t2.micro,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/region=ap-northeast-1,failure-domain.beta.kubernetes.io/zone=ap-northeast-1c,kops.k8s.io/instancegroup=nodes,kubernetes.io/arch=amd64,kubernetes.io/hostname=ip-172-20-63-173.ap-northeast-1.compute.internal,kubernetes.io/os=linux,kubernetes.io/role=node,node-role.kubernetes.io/node=
+	ip-172-20-63-70.ap-northeast-1.compute.internal    Ready    master   9m58s   v1.16.9   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=t2.micro,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/region=ap-northeast-1,failure-domain.beta.kubernetes.io/zone=ap-northeast-1c,kops.k8s.io/instancegroup=master-ap-northeast-1c,kubernetes.io/arch=amd64,kubernetes.io/hostname=ip-172-20-63-70.ap-northeast-1.compute.internal,kubernetes.io/os=linux,kubernetes.io/role=master,node-role.kubernetes.io/master=
+
+		#ssh to master & perform deployment-
+ssh -i ~/.ssh/id_rsa admin@api.anilk8s.stanley.com		
+		(OR)
+cd ~/.ssh
+ssh -i id_rsa admin@18.181.187.128  (# k8s master public ip)
+     
+	     #delete k8s cluster-
+kops delete cluster anilk8s.stanley.com --yes		 

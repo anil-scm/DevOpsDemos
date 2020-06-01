@@ -1,0 +1,55 @@
+﻿####Docker-Compose#####
+
+Step 1 : install docker compose
+   (already installed on windows and mac with docker)
+   docker-compose -v
+   
+   2 Ways
+   
+	I.
+   1.  Step 1 : install docker compose
+   (already installed on windows and mac with docker)
+   docker-compose -v
+   
+    II.
+		#follow-https://docs.docker.com/compose/install/
+		
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+  
+docker-compose -v
+
+   2. Using PIP
+      pip install -U docker-compose
+
+Step 2 : Create docker compose file at any location on your system
+   docker-compose.yml
+   
+   vi docer-compose.yml
+   
+version: '3.0'
+   
+services: 
+
+     web:
+      image: nginx
+	   
+     database: 
+      image: radis
+	   
+step 3 : Check the validity of file by command
+    docker-compose config
+
+Step 4 : Run docker-compose.yml file by command
+   docker-compose up -d
+
+Steps 5 : Bring down application by command
+   docker-compose down
+
+TIPS
+How to scale services
+
+—scale
+docker-compose up -d --scale database=4
+

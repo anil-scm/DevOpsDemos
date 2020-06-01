@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: anil-svc
+  labels:
+    app: stanley-v1.0.0
+spec:
+  selector:
+    app: stanley-v1.0.0
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 43210
+
+###kubectl apply -f svc.yml ####

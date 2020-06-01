@@ -1,0 +1,103 @@
+###SonarQube Checking code quality in windows machine###
+
+		#pre-requisites
+		*compartible java version to be installed
+
+		#Download SonarQube and Sonar-Scanner Package and unzip them
+		*go to Sonar-Scanner-x.x-->conf-->sonar-scanner
+		*update the sonar-scanner file as below
+
+sonar.projectKey=project-hello
+sonar.projectName=project-hello
+sonar.projectVersion=1.0.0
+sonar.sources=C:/Users/user/Desktop/war file/hello-world/hello-world/webapp     #src file path,in case of "\" use "/" in windows
+
+		*go to SonarQube-x.x-->bin-->windows-x86-64
+		*open cmd terminal and put the below cmd
+stratsonar.bat   #wait till sonar up and running then go to browser
+
+		#open browser and put the below url and hit enter
+localhost:9000 
+
+		#code quality checking in sonar-scanner
+		*go to sonar-scanner-x.x-->bin-->
+		*open cmd terminal and run the below cmd
+sonar-scanner.bat
+
+
+		#now go to the browser and check code quality in the sonarqube dashboard
+
+#####SonarQube Checking code quality in Linux machine#####
+		#create sonar user 
+sudo useradd sonar
+		#provide sudo previlege to sonar
+visudo
+		#add sonar under root user 
+sonar    ALL    ALL	
+ 
+		# switch to sonar user
+su sonar
+		
+		#Pre-requisites: compartible java version to be installed in the machine, unzip & wget also to be installed
+sudo yum install java wget unzip -y
+ 		
+		#download the SonarQube package from https://www.sonarqube.org/downloads/  & unzip # choose version as per requirement 
+cd /opt
+sudo wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-7.0.zip	
+sudo unzip sonarqube-7.0.zip
+
+		#give recursive ownership & permission to sonar for sonarqube-7.0 
+sudo chown -R sonar:sonar sonarqube-7.0	
+chmod -R 775 /opt/sonarqube-7.0
+
+		#add sonar user in sonar.sh
+vi /opt/sonarqube-7.0/bin/linux-x86-64/sonar.sh
+
+RUN_AS_USER=sonar
+
+		#run the sonar
+cd /opt/sonarqube-7.0/bin/linux-x86-64/
+./sonar.sh start
+	Starting SonarQube...
+	Started SonarQube.
+	
+		#check status
+./sonar.sh status
+	SonarQube is running (3556).
+	
+		#browse sonarqube server (9000 is sonarqube default port)  
+		#& edit the inbound in server security group with port tcp 9000 open
+http://sonarqube-server-IP:9000
+
+		#1. login to sonarQube, default credential is admin (for both user name & password) 
+		#2. for good security practice change admin password
+		#3. go to adminstration, create user and genenerate token (copy genenerated token)
+		#4. create credential in jenkins, use secret text type, name as sonar-jenkins,ID as sonar1, secret as generated token
+		#5. go to jenkins configure system, under sonarqube server privide name as sonar1, sonar URL : IP-sonarQube:9000/, add credential named sonar-jenkins  	
+		
+			
+		
+		#pipeline script-jenkins integration with SonarQube:
+		
+node {
+    
+    stage("git checkout") {
+        git credentialsId: 'gitHub', url: 'https://github.com/anil-scm/hello-world.git'
+    }
+    stage ("maven build") {
+        def mavenHome = tool name: "maven1" , type: "maven"      //maven1 is name from jenkins global tool configuration  of maven //
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    stage ("sonarQube Code Analysis") {
+        def mavenHome = tool name: "maven1" , type: "maven"
+        withSonarQubeEnv("sonar1") {						// sonar1 is the name of sonarQube server with credential //  
+            sh "${mavenHome}/bin/mvn sonar:sonar"    
+        }
+    }
+}    		
+		
+  
+			
+	
+	
+		

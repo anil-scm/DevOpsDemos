@@ -1,0 +1,62 @@
+		#CloudWatch
+		How to stream Application logs from EC2 instance to CloudWatch and create an Alarm based on certain string pattern in the logs.
+		# Ref: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/QuickStartEC2Instance.html
+
+		#1. IAM Policy
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams"
+    ],
+      "Resource": [
+        "arn:aws:logs:*:*:*"
+    ]
+  }
+ ]
+}
+
+		#2. Attach policy to Role & then Role to ec2
+		
+		#3. Install cloudWatch agent on ec2
+sudo yum update -y
+sudo yum install -y awslogs
+
+		#4. configure cloudWatch agent
+sudo vim /etc/awslogs/awscli.conf		#set the aws region
+	[plugins]
+	cwlogs = cwlogs
+	[default]
+	region = ap-northeast-1
+
+sudo vim /etc/awslogs/awslogs.conf
+		#awslogs.conf file contents:
+[general]
+state_file = 7
+[application_logs]
+region = ap-south-1
+datetime_format = %b %d %H:%M:%S
+file = /var/log/application.log
+buffer_duration = 5000
+log_stream_name = {instance_id}
+initial_position = start_of_file
+log_group_name = application_logs
+
+		#5. Start the awslogs agent
+sudo service awslogs start
+		OR
+sudo systemctl start awslogsd    #for amazon linux2 EC2 instance		
+
+		#6. Create the log file
+touch /var/log/application.log	
+
+		#7. set path to application.log (what you want to monitor)
+		
+        #8. Go to  aws console --> CloudWatch --> logs # check
+        #9. check on log-groups, then create metric filter and sns to trigger alarm   		
